@@ -1,4 +1,4 @@
-const DICTIONARY_API_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/',
+const DICTIONARY_API_URL = 'https://freedictionaryapi.com/api/v1/entries/en/',
     DEFAULT_HISTORY_SETTING = {
         enabled: true
     };
@@ -37,25 +37,31 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 function extractMeaning(data, word) {
-    if (!data || !Array.isArray(data) || data.length === 0) {
+
+    console.log(data)
+    if (!data || data.length === 0) {
         return null;
     }
 
-    const meanings = data[0].meanings;
+    const meanings = data.entries[0].senses;
+    console.log(meanings)
+    const pronunciations = data.entries[0].pronunciations[0];
+    console.log(pronunciations)
     let definition = "";
 
     // Extract the first definition from the meanings array
     if (meanings && meanings.length > 0) {
         const firstMeaning = meanings[0];
-        const definitions = firstMeaning.definitions;
+        definition = firstMeaning.definition;
 
-        if (definitions && definitions.length > 0) {
-            definition = definitions[0].definition;
-        }
+    // freedictionaryapi.com stores definitions in seperate senses
+        // if (definitions && definitions.length > 0) {
+        //     definition = definitions[0].definition;
+        // }
     }
 
-    const phonetic = data[0].phonetics?.[0]?.text || null;
-    const audioSrc = data[0].phonetics?.[0]?.audio || null;
+    const phonetic = pronunciations?.text || null;
+    const audioSrc = null;
 
     return { word, meaning: definition, phonetic, audioSrc };
 }
